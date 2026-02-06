@@ -1,10 +1,27 @@
-# Jupiter Arbitrage Bot (Offchain) — Solana DEX Trading
+# Solana Arbitrage Bot
 
-**Rust-based Jupiter arbitrage bot for Solana.** Discovers and executes profitable swap opportunities via the [Jupiter](https://jupiter.ag) aggregator. Submits transactions through RPC only (no Jito, Helius, or BloxRoute). Supports **continuous quote polling** and optional **Yellowstone gRPC** big-trade monitoring.
+**A Solana arbitrage bot** built in Rust. Discovers and executes profitable DEX swap opportunities on Solana via the [Jupiter](https://jupiter.ag) aggregator. RPC-only execution (no Jito/BloxRoute). Supports **continuous quote polling** and optional **Yellowstone gRPC** big-trade monitoring.
 
-Useful search terms: *Jupiter arbitrage bot*, *Solana arbitrage*, *Jupiter swap bot*, *DEX arbitrage Rust*, *Solana trading bot*, *Yellowstone gRPC*, *Jupiter API*.
+*Keywords: solana arbitrage bot, Solana arbitrage, Jupiter arbitrage bot, DEX arbitrage Rust, Solana trading bot, Yellowstone gRPC, Jupiter API.*
 
 ---
+
+## Test Results
+
+**$0.006 Profit** - 
+[$77 -> $0.006 Profit](https://solscan.io/tx/4ASCHbwF2q3ZeeKJgcUx93mtTwHHYwu29bmerU3KJPmGupMziqFvnQScuam8Yx4e458TSRwd9QhxC1HSiHT6EZLc#balance_change)
+
+**$0.011 Profit** - 
+[$77 -> $0.011 Profit](https://solscan.io/tx/4uQ4sANAv6oGoBeqE28T7CNQ1fDMX7EsduA87yhhBwpVXGyspVwHokkGa9oC11UEY7Kw6DK5sdWngHgDC7hz9GAS#balance_change)
+
+---
+
+## Contact
+
+Telegram: [vvizardev](https://t.me/vvizardev)
+
+---
+
 
 ## Features
 
@@ -33,7 +50,7 @@ Useful search terms: *Jupiter arbitrage bot*, *Solana arbitrage*, *Jupiter swap 
 1. **Clone and build**
 
    ```bash
-   git clone https://github.com/hodlwarden/solana-arbitrage-bot.git solana-arbitrage-bot && cd solana-arbitrage-bot
+   git clone https://github.com/vvizardev/solana-arbitrage-bot.git solana-arbitrage-bot && cd solana-arbitrage-bot
    cargo build --release
    ```
 
@@ -91,11 +108,4 @@ Legacy key names (e.g. `[credential]`, `wallet_path`, `base_tokens`, `live_tradi
 2. **Execution**
    - Builds swap instructions via the Jupiter API, advances the nonce, then submits the transaction through the configured RPC/submit endpoint with the requested compute units and priority fee.
 
----
-
-## Contact
-
-Telegram: [t.me/hodlwarden](https://t.me/hodlwarden)
-
----
 
