@@ -1,0 +1,89 @@
+# ─── Connection ──────────────────────────────────────────────────────────────
+[connection]
+# Path to your Solana keypair file (JSON byte array or base58 string)
+signer_keypair_path = "/root/ARBMAIN.json"
+
+# RPC endpoint for reading chain state (quotes, nonce, ALTs, etc.)
+rpc_endpoint = "https://elianfu-mainnet-1869.mainnet.rpcpool.com/8382e575-6e45-4c75-be4c-5389629f4421"
+
+# RPC endpoint for submitting transactions (can be same as above,
+# or a dedicated submit endpoint for lower latency)
+submit_endpoint = "https://elianfu-mainnet-1869.mainnet.rpcpool.com/8382e575-6e45-4c75-be4c-5389629f4421"
+
+# Yellowstone gRPC (optional — only needed if geyser_watch_enabled = true)
+geyser_endpoint = "https://api.rpcpool.com:443"
+geyser_auth_token = "8382e575-6e45-4c75-be4c-5389629f4421"
+
+# ─── Jupiter API ─────────────────────────────────────────────────────────────
+[dex_api]
+# Jupiter swap API endpoint
+endpoint = "https://jupiter-swap-api.quiknode.pro/295A45DF282E"
+# Jupiter API key (leave empty for public access, rate-limited)
+auth_token = ""
+
+# ─── Strategy ────────────────────────────────────────────────────────────────
+[strategy]
+# Nonce account public key (you must create one beforehand)
+nonce_account_pubkey = "Dxu8dEngsxTmttn66ngLaHJh4sSdw8oMWJzn4SmKoCLn"
+
+# Default quote mint for non-SOL base tokens (e.g. WSOL)
+default_quote_mint = "So11111111111111111111111111111111111111112"
+
+# Enable/disable live transaction submission (false = simulation only)
+execution_enabled = false
+
+# Continuous polling mode: polls Jupiter quotes on a timer
+polling_enabled = true
+poll_interval_ms = 500
+
+# Yellowstone gRPC big-trades monitor (watches on-chain for large swaps)
+geyser_watch_enabled = true
+
+# ─── Instruments (base tokens to arbitrage) ──────────────────────────────────
+# Each [[strategy.instruments]] block defines a token to scan for arb opportunities.
+
+[[strategy.instruments]]
+token_mint = "So11111111111111111111111111111111111111112"  # WSOL
+min_delta_threshold = 0.5           # Min delta to trigger (Yellowstone mode)
+min_profit_quote_units = 0.00001      # Min profit in token units (0.001 SOL)
+notional_range = [0.1, 5.0]         # Quote range in token units
+grid_steps = 10                     # Number of quote grid points
+
+[[strategy.instruments]]
+token_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC
+min_delta_threshold = 50.0
+min_profit_quote_units = 0.01       # Min profit: $0.01
+notional_range = [10.0, 1000.0]
+grid_steps = 8
+
+# ─── Transaction Fees ────────────────────────────────────────────────────────
+[fees]
+compute_unit_limit = 400000         # CU limit per transaction
+priority_fee_lamports = 10000       # Priority fee in micro-lamports
+relay_tip_sol = 0.0                 # Jito/relay tip (0 for RPC-only)
+sol_price_usd = 150.0               # Fallback SOL price (auto-fetched at runtime)
+
+# ─── Flash Loan (optional) ───────────────────────────────────────────────────
+[flash_loan]
+enabled = true
+# program_id defaults to jupgfSgfuAXv4B6R2Uxu85Z1qdzgju79s6MfZekN6XS
+
+# One reserve block per token you want to flash borrow.
+# You must look up these addresses from the Jupiter Lend program on-chain.
+[[flash_loan.reserves]]
+token_mint = "So11111111111111111111111111111111111111112"           # WSOL
+flashloan_token_reserves_liquidity = "4Y66HtUEqbbbpZdENGtFdVhUMS3tnagffn3M4do59Nfy"
+flashloan_borrow_position_on_liquidity = "BZZKgXxhxVkzx3NN8RfBPwU7ZmnQbDtp3ezcsXbiALL6"
+rate_model = "Acvyi9HBGmqh3Exe1N4PjBVyY8fokq2AdC6fSLqV6KSo"
+vault = "5JP5zgYCb9W37QQLgAHRHuinFLrKt87akDY1CgZoTPzr"
+liquidity = "7s1da8DduuBFqGra5bJBjpnvL5E9mGzCuMk1Qkh4or2Z"
+liquidity_program = "jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC"
+
+[[flash_loan.reserves]]
+token_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"           # WSOL
+flashloan_token_reserves_liquidity = "4Y66HtUEqbbbpZdENGtFdVhUMS3tnagffn3M4do59Nfy"
+flashloan_borrow_position_on_liquidity = "BZZKgXxhxVkzx3NN8RfBPwU7ZmnQbDtp3ezcsXbiALL6"
+rate_model = "Acvyi9HBGmqh3Exe1N4PjBVyY8fokq2AdC6fSLqV6KSo"
+vault = "5JP5zgYCb9W37QQLgAHRHuinFLrKt87akDY1CgZoTPzr"
+liquidity = "7s1da8DduuBFqGra5bJBjpnvL5E9mGzCuMk1Qkh4or2Z"
+liquidity_program = "jupeiUmn818Jg1ekPURTpr4mFo29p46vygyykFJ3wZC"
