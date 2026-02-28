@@ -22,53 +22,69 @@ pub static FLASH_LOAN_CONTEXTS: Lazy<Option<HashMap<String, FlashLoanContext>>> 
             return None;
         }
     };
-    let lending_market = match Pubkey::from_str(&fl_config.lending_market) {
-        Ok(pk) => pk,
-        Err(e) => {
-            tracing::error!(error = %e, "Invalid flash_loan.lending_market");
-            return None;
-        }
-    };
 
     let mut contexts = HashMap::new();
     for reserve_cfg in &fl_config.reserves {
-        let token_mint = match Pubkey::from_str(&reserve_cfg.token_mint) {
-            Ok(pk) => pk,
-            Err(e) => {
-                tracing::warn!(mint = %reserve_cfg.token_mint, error = %e, "Skipping reserve: bad token_mint");
-                continue;
+        let parse = |name: &str, value: &str| -> Option<Pubkey> {
+            match Pubkey::from_str(value) {
+                Ok(pk) => Some(pk),
+                Err(e) => {
+                    tracing::warn!(
+                        mint = %reserve_cfg.token_mint,
+                        field = name,
+                        error = %e,
+                        "Skipping reserve: bad address"
+                    );
+                    None
+                }
             }
         };
-        let reserve = match Pubkey::from_str(&reserve_cfg.reserve) {
-            Ok(pk) => pk,
-            Err(e) => {
-                tracing::warn!(mint = %reserve_cfg.token_mint, error = %e, "Skipping reserve: bad reserve");
-                continue;
-            }
+
+        let token_mint = match parse("token_mint", &reserve_cfg.token_mint) {
+            Some(pk) => pk,
+            None => continue,
         };
-        let liquidity_supply = match Pubkey::from_str(&reserve_cfg.liquidity_supply) {
-            Ok(pk) => pk,
-            Err(e) => {
-                tracing::warn!(mint = %reserve_cfg.token_mint, error = %e, "Skipping reserve: bad liquidity_supply");
-                continue;
-            }
+        let flashloan_token_reserves_liquidity = match parse(
+            "flashloan_token_reserves_liquidity",
+            &reserve_cfg.flashloan_token_reserves_liquidity,
+        ) {
+            Some(pk) => pk,
+            None => continue,
         };
-        let fee_receiver = match Pubkey::from_str(&reserve_cfg.fee_receiver) {
-            Ok(pk) => pk,
-            Err(e) => {
-                tracing::warn!(mint = %reserve_cfg.token_mint, error = %e, "Skipping reserve: bad fee_receiver");
-                continue;
-            }
+        let flashloan_borrow_position_on_liquidity = match parse(
+            "flashloan_borrow_position_on_liquidity",
+            &reserve_cfg.flashloan_borrow_position_on_liquidity,
+        ) {
+            Some(pk) => pk,
+            None => continue,
+        };
+        let rate_model = match parse("rate_model", &reserve_cfg.rate_model) {
+            Some(pk) => pk,
+            None => continue,
+        };
+        let vault = match parse("vault", &reserve_cfg.vault) {
+            Some(pk) => pk,
+            None => continue,
+        };
+        let liquidity = match parse("liquidity", &reserve_cfg.liquidity) {
+            Some(pk) => pk,
+            None => continue,
+        };
+        let liquidity_program = match parse("liquidity_program", &reserve_cfg.liquidity_program) {
+            Some(pk) => pk,
+            None => continue,
         };
 
         let ctx = FlashLoanContext::new(
             program_id,
-            lending_market,
             ReserveInfo {
-                reserve,
-                liquidity_supply,
-                fee_receiver,
                 token_mint,
+                flashloan_token_reserves_liquidity,
+                flashloan_borrow_position_on_liquidity,
+                rate_model,
+                vault,
+                liquidity,
+                liquidity_program,
             },
         );
         contexts.insert(reserve_cfg.token_mint.clone(), ctx);
