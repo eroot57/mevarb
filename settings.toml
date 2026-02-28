@@ -17,9 +17,9 @@ geyser_auth_token = "8382e575-6e45-4c75-be4c-5389629f4421"
 # ─── Jupiter API ─────────────────────────────────────────────────────────────
 [dex_api]
 # Jupiter swap API endpoint
-endpoint = "https://api.jup.ag/swap/v1"
+endpoint = "https://jupiter-swap-api.quiknode.pro/295A45DF282E"
 # Jupiter API key (leave empty for public access, rate-limited)
-auth_token = "01a29889-1a12-4678-b38a-be5848e6f78b"
+auth_token = ""
 
 # ─── Strategy ────────────────────────────────────────────────────────────────
 [strategy]
@@ -34,7 +34,7 @@ execution_enabled = false
 
 # Continuous polling mode: polls Jupiter quotes on a timer
 polling_enabled = true
-poll_interval_ms = 500
+poll_interval_ms = 200
 
 # Yellowstone gRPC big-trades monitor (watches on-chain for large swaps)
 geyser_watch_enabled = true
@@ -44,16 +44,16 @@ geyser_watch_enabled = true
 
 [[strategy.instruments]]
 token_mint = "So11111111111111111111111111111111111111112"  # WSOL
-min_delta_threshold = 0.5           # Min delta to trigger (Yellowstone mode)
-min_profit_quote_units = 0.00001      # Min profit in token units (0.001 SOL)
-notional_range = [0.1, 5.0]         # Quote range in token units
+min_delta_threshold = 0.1           # Min delta to trigger (Yellowstone mode)
+min_profit_quote_units = 0.0000001      # Min profit in token units (0.001 SOL)
+notional_range = [0.01, 50.0]         # Quote range in token units
 grid_steps = 10                     # Number of quote grid points
 
 [[strategy.instruments]]
 token_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC
-min_delta_threshold = 50.0
-min_profit_quote_units = 0.01       # Min profit: $0.01
-notional_range = [10.0, 1000.0]
+min_delta_threshold = 10.0
+min_profit_quote_units = 0.0001       # Min profit: $0.01
+notional_range = [1.0, 10000.0]
 grid_steps = 8
 
 # ─── Transaction Fees ────────────────────────────────────────────────────────
