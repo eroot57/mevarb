@@ -354,7 +354,7 @@ async fn run_big_trades_monitor() -> Result<(), anyhow::Error> {
         info!("Connecting and subscribing to Yellowstone");
 
         let builder = match GeyserGrpcClient::build_from_shared(yellowstone_endpoint.clone()) {
-            Ok(b) => b.tls(true),
+            Ok(b) => b,
             Err(e) => {
                 error!(error = ?e, "Yellowstone builder error");
                 tokio::time::sleep(Duration::from_secs(5)).await;
