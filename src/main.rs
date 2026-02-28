@@ -348,24 +348,12 @@ async fn run_big_trades_monitor() -> Result<(), anyhow::Error> {
     let yellowstone_token = YELLOWSTONE_GRPC_TOKEN.as_ref()
         .ok_or_else(|| anyhow::anyhow!("yellowstone_grpc_token not configured"))?;
 
-    let endpoint_url = yellowstone_endpoint
-        .strip_prefix("http://")
-        .or_else(|| yellowstone_endpoint.strip_prefix("https://"))
-        .unwrap_or(yellowstone_endpoint);
-    
-    let (host, port) = if let Some((h, p)) = endpoint_url.split_once(':') {
-        (h, p.parse::<u16>().unwrap_or(10001))
-    } else {
-        (endpoint_url, 10001)
-    };
-
-    info!(%host, %port, "Connecting to Yellowstone gRPC");
+    info!(endpoint = %yellowstone_endpoint, "Connecting to Yellowstone gRPC");
 
     loop {
         info!("Connecting and subscribing to Yellowstone");
 
-        let endpoint = format!("http://{}:{}", host, port);
-        let builder = match GeyserGrpcClient::build_from_shared(endpoint) {
+        let builder = match GeyserGrpcClient::build_from_shared(yellowstone_endpoint.clone()) {
             Ok(b) => b,
             Err(e) => {
                 error!(error = ?e, "Yellowstone builder error");
