@@ -5,13 +5,13 @@ use jupiter_swap_api_client::JupiterSwapApiClient;
 use once_cell::sync::Lazy;
 
 pub static JUPITER_ENDPOINT: Lazy<String> =
-    Lazy::new(|| config::CONFIG.dex_api.endpoint.clone());
+    Lazy::new(|| config::CONFIG.services.endpoint.clone());
 
 pub static JUPITER_API_KEY: Lazy<Option<String>> = Lazy::new(|| {
-    if config::CONFIG.dex_api.auth_token.is_empty() {
+    if config::CONFIG.services.auth_token.is_empty() {
         None
     } else {
-        Some(config::CONFIG.dex_api.auth_token.clone())
+        Some(config::CONFIG.services.auth_token.clone())
     }
 });
 
