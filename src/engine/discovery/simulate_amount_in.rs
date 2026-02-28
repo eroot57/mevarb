@@ -111,7 +111,7 @@ pub async fn simulate_amount_in(
     
     // Log all trades (both profitable and unprofitable) and filter profitable ones
     let mut profitable_trades: Vec<(u64, u64, QuoteResponse, QuoteResponse, u128, String)> = Vec::new();
-    let mut unprofitable_count = 0;
+    let mut _unprofitable_count = 0;
     
     for (in_amount, out_amount, in_res, out_res, elapsed, target_token) in ok_results {
         let gross_profit = out_amount as i64 - in_amount as i64;
@@ -152,7 +152,7 @@ pub async fn simulate_amount_in(
             profitable_trades.push((in_amount, out_amount, in_res, out_res, elapsed, target_token));
         } else {
             // Unprofitable trade - log it too
-            unprofitable_count += 1;
+            _unprofitable_count += 1;
             // write_log(&format!(
             //     "[SIMULATE] ❌ Unprofitable: {} -> {} -> {}: in={:.6} {}, out={:.6} {}, gross_profit={:.6} {}, net_profit={:.6} {} (tx_cost={:.6} {}, min_required={:.6} {}, shortfall={:.6} {})",
             //     mother_token_symbol,

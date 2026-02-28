@@ -16,10 +16,8 @@ use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     message::{v0, VersionedMessage},
     pubkey::Pubkey,
-    signer::Signer,
     sysvar,
     system_instruction::advance_nonce_account,
-    system_program,
     transaction::VersionedTransaction,
 };
 use spl_associated_token_account::{
@@ -112,7 +110,7 @@ fn build_flash_loan_accounts(
         AccountMeta::new_readonly(ctx.reserve_info.liquidity_program, false),             // liquidity_program
         AccountMeta::new_readonly(TOKEN_PROGRAM_ID, false),                               // token_program
         AccountMeta::new_readonly(ASSOCIATED_TOKEN_PROGRAM_ID, false),                    // associated_token_program
-        AccountMeta::new_readonly(system_program::id(), false),                           // system_program
+        AccountMeta::new_readonly(solana_sdk::system_program::ID, false),                  // system_program
         AccountMeta::new_readonly(sysvar::instructions::id(), false),                     // instruction_sysvar
     ]
 }
