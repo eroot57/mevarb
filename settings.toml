@@ -11,7 +11,7 @@ rpc_endpoint = "https://elianfu-mainnet-1869.mainnet.rpcpool.com/8382e575-6e45-4
 submit_endpoint = "https://elianfu-mainnet-1869.mainnet.rpcpool.com/8382e575-6e45-4c75-be4c-5389629f4421"
 
 # Yellowstone gRPC (optional — only needed if geyser_watch_enabled = true)
-geyser_endpoint = "http://api.rpcpool.com:443"
+geyser_endpoint = "http://api.rpcpool.com"
 geyser_auth_token = "8382e575-6e45-4c75-be4c-5389629f4421"
 
 # ─── Jupiter API ─────────────────────────────────────────────────────────────
