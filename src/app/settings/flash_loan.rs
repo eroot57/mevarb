@@ -5,7 +5,7 @@ use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
 
 use crate::app::config;
-use crate::engine::jupiter::flash_loan::{FlashLoanContext, ReserveInfo};
+use crate::{FlashLoanContext, ReserveInfo};
 
 /// Pre-built flash loan contexts keyed by token mint string.
 /// None if flash loans are disabled in config.

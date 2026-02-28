@@ -1,6 +1,6 @@
 pub mod build_swap_ix;
 pub mod estimate_timing;
-pub mod flash_loan;
+mod flash_loan;
 pub mod get_quote;
 pub mod get_swap_infos;
 pub mod get_swap_ix;

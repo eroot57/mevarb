@@ -1,14 +1,11 @@
 use chrono::Utc;
-use futures::{Stream, StreamExt, future::join_all};
-// Temporarily disabled: use helius_laserstream::SubscribeUpdate;
+use futures::future::join_all;
 use solana_relayer_adapter_rust::{Tips, ultra_submit};
 use solana_sdk::{
     system_instruction::advance_nonce_account,
     transaction::Transaction,
-    signature::Signer,
     bs58,
 };
-use yellowstone_grpc_proto::prelude::SubscribeUpdate;
 
 use std::time::Instant;
 use std::fs::OpenOptions;
@@ -136,8 +133,8 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
         // Combine results from both simulations
         quote_data.extend(quote_data_large);
     }
-    let simulate_elapsed = simulate_start.elapsed();
-    
+    let _simulate_elapsed = simulate_start.elapsed();
+
     // If only simulating (not submitting), return early after simulation
     if !CONFIG.strategy.live_trading {
         return;

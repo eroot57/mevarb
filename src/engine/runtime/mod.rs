@@ -1,4 +1,4 @@
-pub mod alt;
+mod alt;
 pub mod block_hash;
 pub mod fee_cost;
 pub mod nonce;
