@@ -5,21 +5,25 @@ use std::fs;
 pub mod arbitrage;
 pub mod credential;
 pub mod fee;
+pub mod flash_loan;
 
 pub use arbitrage::*;
 pub use credential::*;
 pub use fee::*;
+pub use flash_loan::*;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     #[serde(rename = "connection", alias = "node", alias = "credential")]
     pub node: NodeConfig,
     #[serde(rename = "dex_api", alias = "swap_api", alias = "services")]
-    pub swap_api: SwapApiConfig,
+    pub services: SwapApiConfig,
     #[serde(rename = "strategy", alias = "arbitrage")]
     pub strategy: StrategyConfig,
     #[serde(rename = "fees", alias = "tx_cost", alias = "fee")]
     pub tx_cost: TxCostConfig,
+    #[serde(default)]
+    pub flash_loan: FlashLoanConfig,
 }
 
 pub static CONFIG: Lazy<Config> = Lazy::new(|| {

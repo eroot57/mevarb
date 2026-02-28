@@ -226,6 +226,11 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
     let log_tx_id = tx_id.clone();
     let log_mother_token_symbol = mother_token.5.clone();
     
+    // Check if flash loan is available for this token
+    let flash_ctx = FLASH_LOAN_CONTEXTS
+        .as_ref()
+        .and_then(|ctxs| ctxs.get(&token_mint).cloned());
+
     let tasks = std::iter::once((in_amount, out_amount, in_res, out_res, _elapsed, _target_token))
         .map(|(_in_amount, _out_amount, in_res, out_res, _elapsed, _target_token)| {
             // Capture logging variables
@@ -234,8 +239,44 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
             let log_total_tx_cost = log_total_tx_cost;
             let log_tx_id = log_tx_id.clone();
             let log_mother_token_symbol = log_mother_token_symbol.clone();
-            
+            let flash_ctx = flash_ctx.clone();
+
             tokio::spawn(async move {
+                // ── Flash loan path ─────────────────────────────────────
+                if let Some(ref ctx) = flash_ctx {
+                    tracing::info!(
+                        token = %log_mother_token_symbol,
+                        in_amount = log_in_amount,
+                        "Submitting flash-loan trade (Yellowstone)"
+                    );
+                    submit_flash_loan_trade(
+                        in_res,
+                        out_res,
+                        mother_token.4,
+                        mother_token.1,
+                        ctx,
+                    )
+                    .await;
+
+                    let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S%.3f");
+                    let gross_profit = log_out_amount as i64 - log_in_amount as i64;
+                    let net_profit = gross_profit - log_total_tx_cost;
+                    let submission_log = format!(
+                        "[{}] [SUBMIT_SUCCESS] token={}, in_amount={}, out_amount={}, gross_profit={}, net_profit={}, tx_cost={}, service=FLASH_LOAN_RPC, original_tx_id={}",
+                        timestamp,
+                        log_mother_token_symbol,
+                        log_in_amount,
+                        log_out_amount,
+                        gross_profit,
+                        net_profit,
+                        log_total_tx_cost,
+                        log_tx_id,
+                    );
+                    write_big_trade_log(&submission_log);
+                    return;
+                }
+
+                // ── Regular (non-flash-loan) path ───────────────────────
                 let instr_advance_nonce_account = advance_nonce_account(&NONCE_ADDR, &PUBKEY);
                 let ix = get_swap_ix(
                     in_res,
@@ -255,11 +296,9 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
                 let alts = fetch_alt(ix.address_lookup_table_addresses).await;
 
                 // Build transaction to get signature before submitting
-                // Note: This builds a simplified version for signature calculation
-                // The actual transaction built by ultra_submit may differ slightly
                 let mut all_instructions = vec![instr_advance_nonce_account.clone()];
                 all_instructions.extend(raw_swap_ixs.clone());
-                
+
                 let mut tx = Transaction::new_with_payer(&all_instructions, Some(&PUBKEY));
                 tx.sign(&**SIGNERS, recent_blockhash);
                 let submitted_tx_signature = bs58::encode(tx.signatures[0]).into_string();
@@ -299,15 +338,15 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
                     None,  // BloxRoute
                 )
                 .await;
-                
+
                 let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S%.3f");
                 let submit_msg = format!(
-                    "[{}] [SUBMIT] ✅ Transaction submission completed via {}",
+                    "[{}] [SUBMIT] Transaction submission completed via {}",
                     timestamp,
                     service_name
                 );
                 println!("{}", submit_msg);
-                
+
                 // Log successful submission with details including submitted tx signature
                 let gross_profit = log_out_amount as i64 - log_in_amount as i64;
                 let net_profit = gross_profit - log_total_tx_cost;

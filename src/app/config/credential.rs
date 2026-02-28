@@ -19,9 +19,9 @@ pub struct NodeConfig {
 #[derive(Debug, Deserialize, Clone)]
 pub struct SwapApiConfig {
     #[serde(rename = "endpoint", alias = "base_url", alias = "jupiter_endpoint")]
-    pub base_url: String,
+    pub jupiter_endpoint: String,
     #[serde(rename = "auth_token", alias = "api_key", alias = "jupiter_api_key", default)]
-    pub api_key: String,
+    pub jupiter_api_key: String,
     #[serde(default)]
     pub confirm_service: String,
     #[serde(default)]

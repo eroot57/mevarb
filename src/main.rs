@@ -50,8 +50,20 @@ async fn main() -> Result<(), anyhow::Error> {
         continuous_polling = CONFIG.strategy.poll_quotes,
         polling_interval_ms = CONFIG.strategy.poll_interval_ms,
         submit_transactions = CONFIG.strategy.live_trading,
+        flash_loan = CONFIG.flash_loan.enabled,
         "Arbitrage mode configuration"
     );
+
+    // Log flash loan status
+    if CONFIG.flash_loan.enabled {
+        match FLASH_LOAN_CONTEXTS.as_ref() {
+            Some(contexts) => {
+                let mints: Vec<&str> = contexts.keys().map(|s| s.as_str()).collect();
+                info!(reserves = ?mints, "Flash loans enabled");
+            }
+            None => warn!("Flash loans enabled in config but no valid reserves loaded"),
+        }
+    }
 
     match estimate_jupiter_timing().await {
         Ok(t) => info!(
@@ -207,18 +219,45 @@ async fn continuous_polling_loop(interval_ms: u64) {
                     };
                     
                     if real_profit >= min_profit {
-                        info!(
-                            %symbol,
-                            in = %in_human,
-                            out = %out_human,
-                            real_profit = %real_profit,
-                            tx_cost = %total_tx_cost_in_token,
-                            min_profit = %min_profit,
-                            "Submitting trade"
-                        );
-                        tokio::spawn(async move {
-                            submit_polling_trade(in_res, out_res, min_profit, decimal).await;
-                        });
+                        // Check if flash loan is available for this token
+                        let use_flash_loan = FLASH_LOAN_CONTEXTS
+                            .as_ref()
+                            .and_then(|ctxs| ctxs.get(&mother_token).cloned());
+
+                        if let Some(flash_ctx) = use_flash_loan {
+                            info!(
+                                %symbol,
+                                in = %in_human,
+                                out = %out_human,
+                                real_profit = %real_profit,
+                                tx_cost = %total_tx_cost_in_token,
+                                min_profit = %min_profit,
+                                "Submitting flash-loan trade"
+                            );
+                            tokio::spawn(async move {
+                                submit_flash_loan_trade(
+                                    in_res,
+                                    out_res,
+                                    min_profit,
+                                    decimal,
+                                    &flash_ctx,
+                                )
+                                .await;
+                            });
+                        } else {
+                            info!(
+                                %symbol,
+                                in = %in_human,
+                                out = %out_human,
+                                real_profit = %real_profit,
+                                tx_cost = %total_tx_cost_in_token,
+                                min_profit = %min_profit,
+                                "Submitting trade"
+                            );
+                            tokio::spawn(async move {
+                                submit_polling_trade(in_res, out_res, min_profit, decimal).await;
+                            });
+                        }
                     }
                 }
             }
