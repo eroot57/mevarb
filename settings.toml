@@ -17,9 +17,9 @@ geyser_auth_token = "8382e575-6e45-4c75-be4c-5389629f4421"
 # ─── Jupiter API ─────────────────────────────────────────────────────────────
 [dex_api]
 # Jupiter swap API endpoint
-endpoint = "https://jupiter-swap-api.quiknode.pro/295A45DF282E"
+endpoint = "https://api.jup.ag/swap/v1/swap"
 # Jupiter API key (leave empty for public access, rate-limited)
-auth_token = ""
+auth_token = "01a29889-1a12-4678-b38a-be5848e6f78b"
 
 # ─── Strategy ────────────────────────────────────────────────────────────────
 [strategy]
