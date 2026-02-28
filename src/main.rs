@@ -8,7 +8,7 @@ use solana_sdk::signer::Signer;
 use solana_sdk::system_instruction::advance_nonce_account;
 use tokio::time::{interval, Duration};
 use tracing::{debug, error, info, warn};
-use yellowstone_grpc_client::GeyserGrpcClient;
+use yellowstone_grpc_client::{ClientTlsConfig, GeyserGrpcClient};
 use yellowstone_grpc_proto::geyser::{
     SubscribeRequest, SubscribeRequestFilterTransactions,
 };
@@ -357,6 +357,14 @@ async fn run_big_trades_monitor() -> Result<(), anyhow::Error> {
             Ok(b) => b,
             Err(e) => {
                 error!(error = ?e, "Yellowstone builder error");
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                continue;
+            }
+        };
+        let builder = match builder.tls_config(ClientTlsConfig::new()) {
+            Ok(b) => b,
+            Err(e) => {
+                error!(error = ?e, "Yellowstone TLS config error");
                 tokio::time::sleep(Duration::from_secs(5)).await;
                 continue;
             }
