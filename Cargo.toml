@@ -40,11 +40,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dependencies.jupiter-swap-api-client]
 git = "https://github.com/vvizardev/jupiter-swap-api-client.git"
-version = "0.2.0"
 
 [dependencies.yellowstone-grpc-client]
 git = "https://github.com/rpcpool/yellowstone-grpc.git"
-version = "v8.0.0"
 
 [dependencies.yellowstone-grpc-proto]
-version = "8.0.0"
