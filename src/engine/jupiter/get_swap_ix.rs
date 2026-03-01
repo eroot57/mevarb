@@ -138,7 +138,7 @@ pub async fn get_swap_ix_flash_loan(
     let swap_ix = JUPITER_CLIENT
         .swap_instructions(&combined_request)
         .await
-        .unwrap();
+        .map_err(|e| anyhow::anyhow!("Jupiter swap_instructions (flash loan) failed: {e}"))?;
 
     Ok(swap_ix)
 }
