@@ -207,6 +207,12 @@ pub async fn submit_flash_loan_trade(
 
     let mut all_ixs: Vec<Instruction> = Vec::new();
 
+    let lets_log = true;
+
+    if lets_log {
+        info!(%ix, "FLASH LOAN IX");
+    }
+
     // [0] Advance nonce account
     all_ixs.push(advance_nonce_account(&NONCE_ADDR, &PUBKEY));
 
