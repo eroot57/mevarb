@@ -210,7 +210,7 @@ pub async fn submit_flash_loan_trade(
     let lets_log = true;
 
     if lets_log {
-        info!(%ix, "FLASH LOAN IX");
+        info!(%ix.compute_unit_limit, "FLASH LOAN IX");
     }
 
     // [0] Advance nonce account
