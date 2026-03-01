@@ -44,22 +44,22 @@ geyser_watch_enabled = true
 
 [[strategy.instruments]]
 token_mint = "So11111111111111111111111111111111111111112"  # WSOL
-min_delta_threshold = 0.1           # Min delta to trigger (Yellowstone mode)
+min_delta_threshold = 0.01           # Min delta to trigger (Yellowstone mode)
 min_profit_quote_units = 0.0000001      # Min profit in token units (0.001 SOL)
-notional_range = [0.01, 50.0]         # Quote range in token units
-grid_steps = 10                     # Number of quote grid points
+notional_range = [0.1, 50.0]         # Quote range in token units
+grid_steps = 1                     # Number of quote grid points
 
 [[strategy.instruments]]
 token_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC
-min_delta_threshold = 10.0
-min_profit_quote_units = 0.0001       # Min profit: $0.01
-notional_range = [1.0, 10000.0]
-grid_steps = 8
+min_delta_threshold = 0.01
+min_profit_quote_units = 0.000001       # Min profit: $0.01
+notional_range = [100.0, 25000.0]
+grid_steps = 1
 
 # ─── Transaction Fees ────────────────────────────────────────────────────────
 [fees]
-compute_unit_limit = 400000         # CU limit per transaction
-priority_fee_lamports = 10000       # Priority fee in micro-lamports
+compute_unit_limit = 500000         # CU limit per transaction
+priority_fee_lamports = 0       # Priority fee in micro-lamports
 relay_tip_sol = 0.0                 # Jito/relay tip (0 for RPC-only)
 sol_price_usd = 150.0               # Fallback SOL price (auto-fetched at runtime)
 
