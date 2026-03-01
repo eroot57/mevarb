@@ -228,6 +228,13 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
         .as_ref()
         .and_then(|ctxs| ctxs.get(&token_mint).cloned());
 
+    tracing::info!(
+        token_mint = %token_mint,
+        flash_ctx_found = flash_ctx.is_some(),
+        flash_loan_contexts_loaded = FLASH_LOAN_CONTEXTS.is_some(),
+        "SUBMIT STEP 1: Flash loan context lookup result"
+    );
+
     let tasks = std::iter::once((in_amount, out_amount, in_res, out_res, _elapsed, _target_token))
         .map(|(_in_amount, _out_amount, in_res, out_res, _elapsed, _target_token)| {
             // Capture logging variables
@@ -238,7 +245,18 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
             let log_mother_token_symbol = log_mother_token_symbol.clone();
             let flash_ctx = flash_ctx.clone();
 
+            tracing::info!(
+                token = %log_mother_token_symbol,
+                "SUBMIT STEP 2: Spawning tokio task for trade submission"
+            );
+
             tokio::spawn(async move {
+                tracing::info!(
+                    token = %log_mother_token_symbol,
+                    flash_ctx_available = flash_ctx.is_some(),
+                    "SUBMIT STEP 3: Inside tokio task"
+                );
+
                 // ── Flash loan path ─────────────────────────────────────
                 if let Some(ref ctx) = flash_ctx {
                     tracing::info!(
@@ -254,6 +272,10 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
                         ctx,
                     )
                     .await;
+                    tracing::info!(
+                        token = %log_mother_token_symbol,
+                        "SUBMIT STEP 4: submit_flash_loan_trade returned"
+                    );
 
                     let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S%.3f");
                     let gross_profit = log_out_amount as i64 - log_in_amount as i64;
@@ -272,6 +294,11 @@ pub async fn process_single_trade_yellowstone(sub_update: yellowstone_grpc_proto
                     write_big_trade_log(&submission_log);
                     return;
                 }
+
+                tracing::info!(
+                    token = %log_mother_token_symbol,
+                    "SUBMIT STEP 3b: No flash loan context, falling back to regular path"
+                );
 
                 // ── Regular (non-flash-loan) path ───────────────────────
                 let instr_advance_nonce_account = advance_nonce_account(&NONCE_ADDR, &PUBKEY);
