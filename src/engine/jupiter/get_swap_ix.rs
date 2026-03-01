@@ -3,6 +3,7 @@ use jupiter_swap_api_client::{
     swap::{SwapInstructionsResponse, SwapInstructionsResponseInternal, SwapRequest, SwapResponse},
     transaction_config::{ComputeUnitPriceMicroLamports, TransactionConfig},
 };
+use tracing::{info};
 
 use crate::*;
 
