@@ -72,9 +72,9 @@ async fn main() -> Result<(), anyhow::Error> {
             total_ms = t.quote_ms + t.swap_build_ms,
             "Jupiter timing estimate"
         ),
-        Err(e) => info!(         
-            error = e,
-            error
+        Err(e) => warn!(         
+            error = ?e,
+            "Jupiter timing estimate failed"
         ),
     }
 
