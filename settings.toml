@@ -30,7 +30,7 @@ nonce_account_pubkey = "Dxu8dEngsxTmttn66ngLaHJh4sSdw8oMWJzn4SmKoCLn"
 default_quote_mint = "So11111111111111111111111111111111111111112"
 
 # Enable/disable live transaction submission (false = simulation only)
-execution_enabled = false
+execution_enabled = true
 
 # Continuous polling mode: polls Jupiter quotes on a timer
 polling_enabled = true
