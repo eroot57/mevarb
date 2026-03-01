@@ -140,6 +140,7 @@ pub async fn get_swap_ix_flash_loan(
     let url = format!("{}/swap-instructions", *JUPITER_ENDPOINT);
 
     let response = reqwest::Client::builder()
+        .http1_only()
         .timeout(std::time::Duration::from_secs(10))
         .build()?
         .post(&url)
