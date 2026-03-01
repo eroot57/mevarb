@@ -72,7 +72,10 @@ async fn main() -> Result<(), anyhow::Error> {
             total_ms = t.quote_ms + t.swap_build_ms,
             "Jupiter timing estimate"
         ),
-        Err(e) => info!(error = %e, "Jupiter timing estimate skipped", e),
+        Err(e) => warn!(
+            "Jupiter timing estimate skipped",
+            e
+        ),
     }
 
     // Start continuous polling if enabled
