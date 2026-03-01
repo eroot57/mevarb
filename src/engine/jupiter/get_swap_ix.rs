@@ -149,6 +149,7 @@ pub async fn get_swap_ix_flash_loan(
     );
 
     let response = reqwest::Client::builder()
+        .use_native_tls()
         .no_proxy()
         .timeout(std::time::Duration::from_secs(10))
         .build()?
