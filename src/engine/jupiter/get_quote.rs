@@ -1,5 +1,6 @@
 use jupiter_swap_api_client::quote::{QuoteRequest, QuoteResponse};
 use solana_sdk::pubkey::Pubkey;
+use tracing::{debug, error, info, warn};
 
 use crate::JUPITER_CLIENT;
 
@@ -21,6 +22,7 @@ pub async fn get_quote_big_trade(
 
     let quote_response_1 = JUPITER_CLIENT.quote(&quote_request_1).await?;
 
+    info!("q1", quote_response_1);
     let dexes_used_in_req_1 = quote_response_1
         .route_plan
         .iter()
