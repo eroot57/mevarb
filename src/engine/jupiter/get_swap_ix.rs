@@ -1,6 +1,6 @@
 use jupiter_swap_api_client::{
     quote::{QuoteResponse, SwapMode},
-    swap::{SwapInstructionsResponse, SwapRequest, SwapResponse},
+    swap::{SwapInstructionsResponse, SwapInstructionsResponseInternal, SwapRequest, SwapResponse},
     transaction_config::{ComputeUnitPriceMicroLamports, TransactionConfig},
 };
 
@@ -135,10 +135,41 @@ pub async fn get_swap_ix_flash_loan(
         user_public_key: PUBKEY.clone(),
     };
 
-    let swap_ix = JUPITER_CLIENT
-        .swap_instructions(&combined_request)
-        .await
-        .map_err(|e| anyhow::anyhow!("Jupiter swap_instructions (flash loan) failed: {e}"))?;
+    // Direct HTTP request instead of library call — gives us full error
+    // diagnostics (timeout vs. connect vs. HTTP status vs. deserialization).
+    let url = format!("{}/swap-instructions", *JUPITER_ENDPOINT);
 
-    Ok(swap_ix)
+    let response = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()?
+        .post(&url)
+        .json(&combined_request)
+        .send()
+        .await
+        .map_err(|e| {
+            anyhow::anyhow!(
+                "swap-instructions POST to {} failed: {:?} (timeout={}, connect={}, request={})",
+                url, e, e.is_timeout(), e.is_connect(), e.is_request()
+            )
+        })?;
+
+    let status = response.status();
+    if !status.is_success() {
+        let body = response.text().await.unwrap_or_default();
+        let preview = &body[..body.len().min(500)];
+        return Err(anyhow::anyhow!(
+            "swap-instructions returned HTTP {status}: {preview}"
+        ));
+    }
+
+    let body = response.bytes().await?;
+    let internal: SwapInstructionsResponseInternal = serde_json::from_slice(&body)
+        .map_err(|e| {
+            let preview = String::from_utf8_lossy(&body[..body.len().min(500)]);
+            anyhow::anyhow!(
+                "swap-instructions deserialization failed: {e}, body_preview={preview}"
+            )
+        })?;
+
+    Ok(internal.into())
 }
