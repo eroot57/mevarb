@@ -16,4 +16,4 @@ pub static JUPITER_API_KEY: Lazy<Option<String>> = Lazy::new(|| {
 });
 
 pub static JUPITER_CLIENT: Lazy<JupiterSwapApiClient> =
-    Lazy::new(|| JupiterSwapApiClient::new(JUPITER_ENDPOINT.clone()));
+    Lazy::new(|| JupiterSwapApiClient::new(JUPITER_ENDPOINT.clone(), JUPITER_API_KEY.clone()));
