@@ -187,6 +187,13 @@ pub async fn submit_flash_loan_trade(
 ) {
     let borrow_amount = in_res.in_amount;
 
+    info!(
+        borrow_amount = borrow_amount,
+        min_profit_amount = min_profit_amount,
+        decimal = decimal,
+        "STEP 1: Starting flash loan trade submission"
+    );
+
     // Build swap instructions with wrap_and_unwrap_sol = false since the
     // flash loan provides tokens directly in SPL form.
     let ix = match get_swap_ix_flash_loan(
@@ -198,27 +205,36 @@ pub async fn submit_flash_loan_trade(
     {
         Ok(ix) => ix,
         Err(e) => {
-            error!(error = %e, "Failed to build swap_ix for flash loan trade");
+            error!(error = %e, "STEP 2 FAILED: get_swap_ix_flash_loan failed");
             return;
         }
     };
 
+    info!(
+        setup_ix_count = ix.setup_instructions.len(),
+        alt_count = ix.address_lookup_table_addresses.len(),
+        "STEP 2: Got swap instructions from Jupiter"
+    );
+
     // ── Assemble instructions ───────────────────────────────────────────
 
     let mut all_ixs: Vec<Instruction> = Vec::new();
-    
+
     // [0] Advance nonce account
     all_ixs.push(advance_nonce_account(&NONCE_ADDR, &PUBKEY));
+    info!(nonce_addr = %*NONCE_ADDR, "STEP 3a: Pushed advance_nonce_account ix");
 
     // [1] Compute unit limit
     all_ixs.push(ComputeBudgetInstruction::set_compute_unit_limit(
         FEES.compute_units as u32,
     ));
+    info!(compute_units = FEES.compute_units, "STEP 3b: Pushed compute_unit_limit ix");
 
     // [2] Compute unit price (priority fee)
     all_ixs.push(ComputeBudgetInstruction::set_compute_unit_price(
         FEES.priority_lamports,
     ));
+    info!(priority_lamports = FEES.priority_lamports, "STEP 3c: Pushed compute_unit_price ix");
 
     // [3] Ensure user's ATA for the borrowed token exists
     all_ixs.push(create_associated_token_account_idempotent(
@@ -227,9 +243,11 @@ pub async fn submit_flash_loan_trade(
         &flash_ctx.reserve_info.token_mint, // mint
         &TOKEN_PROGRAM_ID,                  // token program
     ));
+    info!(token_mint = %flash_ctx.reserve_info.token_mint, "STEP 3d: Pushed create_ata_idempotent ix");
 
     // [4] Flash borrow
     all_ixs.push(build_flash_borrow_ix(flash_ctx, borrow_amount, &PUBKEY));
+    info!(borrow_amount = borrow_amount, "STEP 3e: Pushed flash_borrow ix");
 
     // Destructure swap instruction response to avoid partial-move issues.
     let setup_instructions = ix.setup_instructions;
@@ -237,8 +255,10 @@ pub async fn submit_flash_loan_trade(
     let alt_addresses = ix.address_lookup_table_addresses;
 
     // [5..N-1] Jupiter swap setup + swap
+    let setup_count = setup_instructions.len();
     all_ixs.extend(setup_instructions);
     all_ixs.push(swap_instruction);
+    info!(setup_ix_count = setup_count, "STEP 3f: Pushed {} setup ixs + swap ix", setup_count);
 
     // [N] Flash payback
     all_ixs.push(build_flash_payback_ix(
@@ -246,48 +266,54 @@ pub async fn submit_flash_loan_trade(
         borrow_amount,
         &PUBKEY,
     ));
+    info!(borrow_amount = borrow_amount, "STEP 3g: Pushed flash_payback ix");
 
     // ── Build and sign VersionedTransaction ─────────────────────────────
 
     let total_ix_count = all_ixs.len();
+    info!(total_ix_count = total_ix_count, "STEP 4: Assembled all instructions");
 
     let nonce_data = get_nonce();
     let recent_blockhash = nonce_data.blockhash();
+    info!(blockhash = %recent_blockhash, "STEP 5: Got nonce blockhash");
 
     let alts = fetch_alt(alt_addresses).await;
+    info!(alt_count = alts.len(), "STEP 6: Fetched address lookup tables");
 
     let v0_msg = match v0::Message::try_compile(&PUBKEY, &all_ixs, &alts, recent_blockhash) {
         Ok(m) => m,
         Err(e) => {
-            error!(error = %e, "Failed to compile flash loan v0 message");
+            error!(error = %e, "STEP 7 FAILED: v0::Message::try_compile failed");
             return;
         }
     };
+    info!("STEP 7: Compiled v0 message successfully");
 
     let versioned_msg = VersionedMessage::V0(v0_msg);
 
     let tx = match VersionedTransaction::try_new(versioned_msg, &[&*PRIVATE_KEY]) {
         Ok(t) => t,
         Err(e) => {
-            error!(error = %e, "Failed to sign flash loan transaction");
+            error!(error = %e, "STEP 8 FAILED: VersionedTransaction::try_new (signing) failed");
             return;
         }
     };
+    info!("STEP 8: Signed transaction successfully");
 
     // ── Submit via RPC ──────────────────────────────────────────────────
 
     info!(
         borrow_amount = borrow_amount,
         total_ixs = total_ix_count,
-        "Submitting flash-loan-wrapped trade"
+        "STEP 9: Submitting flash-loan-wrapped trade via RPC"
     );
 
     match SUBMIT_CLIENT.send_transaction(&tx).await {
         Ok(sig) => {
-            info!(signature = %sig, "Flash loan trade submitted");
+            info!(signature = %sig, "STEP 9 SUCCESS: Flash loan trade submitted");
         }
         Err(e) => {
-            error!(error = %e, "Flash loan trade submission failed");
+            error!(error = %e, "STEP 9 FAILED: Flash loan trade submission failed");
         }
     }
 }
