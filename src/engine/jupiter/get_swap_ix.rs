@@ -167,6 +167,13 @@ pub async fn get_swap_ix_flash_loan(
         })?;
 
     let status = response.status();
+
+    let llog = true;
+
+    if llog {
+        info!(res = %status, "resp");
+    }
+
     if !status.is_success() {
         let body = response.text().await.unwrap_or_default();
         let preview = &body[..body.len().min(500)];
@@ -184,11 +191,6 @@ pub async fn get_swap_ix_flash_loan(
             )
         })?;
 
-    let llog = true;
-
-    if llog {
-        info!(res = %body, "resp");
-    }
 
     Ok(internal.into())
 }
