@@ -167,6 +167,12 @@ async fn continuous_polling_loop(interval_ms: u64) {
             .await;
             let sim_elapsed_ms = sim_start.elapsed().as_millis();
 
+            let mut lets_log = true;
+
+            if lets_log {
+                info!(count = quote_data.len(), %symbol, "Found profitable opportunities");
+            }
+
             if sim_elapsed_ms > 100 {
                 debug!(elapsed_ms = %sim_elapsed_ms, %symbol, "simulate_amount_in slow");
             }
