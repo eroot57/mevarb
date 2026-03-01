@@ -34,7 +34,7 @@ execution_enabled = true
 
 # Continuous polling mode: polls Jupiter quotes on a timer
 polling_enabled = true
-poll_interval_ms = 200
+poll_interval_ms = 1000
 
 # Yellowstone gRPC big-trades monitor (watches on-chain for large swaps)
 geyser_watch_enabled = true
@@ -44,16 +44,16 @@ geyser_watch_enabled = true
 
 [[strategy.instruments]]
 token_mint = "So11111111111111111111111111111111111111112"  # WSOL
-min_delta_threshold = 0.01           # Min delta to trigger (Yellowstone mode)
+min_delta_threshold = 1.0           # Min delta to trigger (Yellowstone mode)
 min_profit_quote_units = 0.0000001      # Min profit in token units (0.001 SOL)
 notional_range = [0.1, 50.0]         # Quote range in token units
 grid_steps = 1                     # Number of quote grid points
 
 [[strategy.instruments]]
 token_mint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC
-min_delta_threshold = 0.0001
+min_delta_threshold = 100.0
 min_profit_quote_units = 0.000001       # Min profit: $0.01
-notional_range = [10.0, 25000.0]
+notional_range = [100.0, 25000.0]
 grid_steps = 1
 
 # ─── Transaction Fees ────────────────────────────────────────────────────────
