@@ -150,7 +150,7 @@ pub async fn get_swap_ix_flash_loan(
 
     let response = reqwest::Client::builder()
         .no_proxy()
-        .timeout(std::time::Duration::from_secs(10))
+        .timeout(std::time::Duration::from_secs(30))
         .build()?
         .post(&url)
         .header("Content-Type", "application/json")
@@ -182,6 +182,12 @@ pub async fn get_swap_ix_flash_loan(
                 "swap-instructions deserialization failed: {e}, body_preview={preview}"
             )
         })?;
+
+    let llog = true;
+
+    if llog {
+        info!(res = %body, "resp");
+    }
 
     Ok(internal.into())
 }
