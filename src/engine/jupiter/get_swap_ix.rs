@@ -139,12 +139,23 @@ pub async fn get_swap_ix_flash_loan(
     // diagnostics (timeout vs. connect vs. HTTP status vs. deserialization).
     let url = format!("{}/swap-instructions", *JUPITER_ENDPOINT);
 
+    // Serialize body upfront so we can log its size and send with explicit
+    // Content-Length (matching curl's behavior exactly).
+    let body_json = serde_json::to_vec(&combined_request)?;
+    tracing::info!(
+        url = %url,
+        body_size = body_json.len(),
+        "swap-instructions: sending POST"
+    );
+
     let response = reqwest::Client::builder()
-        .http1_only()
+        .no_proxy()
         .timeout(std::time::Duration::from_secs(10))
         .build()?
         .post(&url)
-        .json(&combined_request)
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json")
+        .body(body_json)
         .send()
         .await
         .map_err(|e| {
