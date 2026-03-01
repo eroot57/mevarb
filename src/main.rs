@@ -171,7 +171,7 @@ async fn continuous_polling_loop(interval_ms: u64) {
                 debug!(elapsed_ms = %sim_elapsed_ms, %symbol, "simulate_amount_in slow");
             }
 
-            if !quote_data.is_empty() && CONFIG.strategy.live_trading {
+            if !quote_data.is_empty() {
                 info!(count = quote_data.len(), %symbol, "Found profitable opportunities");
                 
                 let best_trade = quote_data.into_iter()
@@ -220,7 +220,7 @@ async fn continuous_polling_loop(interval_ms: u64) {
                         (total_tx_cost_usdc, real_profit_usd)
                     };
                     
-                    if real_profit >= min_profit {
+                    if real_profit >= min_profit && CONFIG.strategy.live_trading {
                         // Check if flash loan is available for this token
                         let use_flash_loan = FLASH_LOAN_CONTEXTS
                             .as_ref()
