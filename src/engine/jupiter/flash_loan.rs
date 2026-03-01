@@ -205,7 +205,7 @@ pub async fn submit_flash_loan_trade(
     {
         Ok(ix) => ix,
         Err(e) => {
-            error!(error = %e, "STEP 2 FAILED: get_swap_ix_flash_loan failed");
+            error!(error = ?e, "STEP 2 FAILED: get_swap_ix_flash_loan failed");
             return;
         }
     };
