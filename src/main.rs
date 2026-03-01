@@ -72,9 +72,9 @@ async fn main() -> Result<(), anyhow::Error> {
             total_ms = t.quote_ms + t.swap_build_ms,
             "Jupiter timing estimate"
         ),
-        Err(e) => warn!(
-            "Jupiter timing estimate skipped",
-            e
+        Err(e) => warn!(         
+            error = e,
+            error
         ),
     }
 
@@ -110,7 +110,6 @@ async fn continuous_polling_loop(interval_ms: u64) {
     
     let mut ticker = interval(Duration::from_millis(interval_ms));
     ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-    
     // Run first poll immediately, then use interval for subsequent polls
     let mut is_first = true;
     loop {
