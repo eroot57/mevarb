@@ -2127,7 +2127,7 @@ dependencies = [
 [[package]]
 name = "jupiter-swap-api-client"
 version = "0.2.0"
-source = "git+https://github.com/jup-ag/jupiter-swap-api-client.git?rev=fb95cfad9f19ed64c40f455772a6bfc4706d14f6#fb95cfad9f19ed64c40f455772a6bfc4706d14f6"
+source = "git+https://github.com/kumavalidator/jupiter-swap-api-client.git#0b846b08972d61b314c3d5eba4e1a40e818a8d21"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
