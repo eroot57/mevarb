@@ -32,7 +32,7 @@ pub async fn get_quote_big_trade(
         amount: quote_response_1.out_amount,
         input_mint: Pubkey::from_str_const(arb_token),
         output_mint: Pubkey::from_str_const(mother_token),
-        exclude_dexes: Some(dexes_used_in_req_1.clone().into()),
+        excluded_dexes: Some(dexes_used_in_req_1.clone().into()),
         only_direct_routes: Some(true),
         restrict_intermediate_tokens : Some(true),
         slippage_bps: 0,
